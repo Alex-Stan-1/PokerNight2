@@ -4,7 +4,15 @@ import TransitionScreen from "../mainPageComponents/TransitionScreen";
 import MainPage from "../mainPageComponents/MainPage";
 
 export default function Home() {
-    const [hasEntered, setHasEntered] = useState(false);
+    const [showMainPage, setShowMainPage] = useState(false);
 
-    return hasEntered ? <MainPage /> : <TransitionScreen onTransitionComplete={() => setHasEntered(true)} />;
+    return (
+        <>
+            {showMainPage ? (
+                <MainPage />
+            ) : (
+                <TransitionScreen onComplete={() => setShowMainPage(true)} />
+            )}
+        </>
+    );
 }
