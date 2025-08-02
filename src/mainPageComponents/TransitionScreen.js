@@ -2,7 +2,6 @@
 import { motion } from "framer-motion";
 import { useEffect, useState, useRef } from "react";
 
-
 export default function TransitionScreen({ onComplete }) {
     const introMessages = [
         "So you have chosen to enter",
@@ -26,33 +25,62 @@ export default function TransitionScreen({ onComplete }) {
         { img: "Hexley_Smug.png", text: "Let's give this place a makeover to match our new theme." }
     ];
 
-    const [fadeOutMessages, setFadeOutMessages] = useState(false);
+    const [showIntro, setShowIntro] = useState(true);
+    const [showNextAfterIntro, setShowNextAfterIntro] = useState(false);
     const [showBlackout, setShowBlackout] = useState(false);
     const [showHexley, setShowHexley] = useState(false);
-    const [dialogueIndex, setDialogueIndex] = useState(0);
-    const [showCurtain, setShowCurtain] = useState(false);
     const [spotlight, setSpotlight] = useState(false);
+    const [dialogueIndex, setDialogueIndex] = useState(0);
+    const [typedText, setTypedText] = useState("");
+    const [showCurtain, setShowCurtain] = useState(false);
     const [showSkip, setShowSkip] = useState(true);
 
     const currentLine = hexleyLines[dialogueIndex];
     const isLastLine = dialogueIndex === hexleyLines.length - 1;
 
+    const audioRef = useRef(null);
+    const typingIntervalRef = useRef(null);
+    const typingTimeoutRef = useRef(null);
+
+    const startTyping = (text) => {
+        setTypedText("");
+
+        if (typingIntervalRef.current) clearInterval(typingIntervalRef.current);
+        if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+
+        const typeSound = new Audio("/Hexley_Typing.mp3");
+        typeSound.volume = 0.03;
+        typeSound.play().catch(() => { });
+
+        typingTimeoutRef.current = setTimeout(() => {
+            let charIndex = 0;
+            typingIntervalRef.current = setInterval(() => {
+                charIndex++;
+                setTypedText(text.slice(0, charIndex));
+                if (charIndex >= text.length) {
+                    clearInterval(typingIntervalRef.current);
+                }
+            }, 30);
+        }, 300);
+    };
+
     useEffect(() => {
         const delay = introMessages.length * 2000 + 500;
+        const nextButtonTimeout = setTimeout(() => setShowNextAfterIntro(true), delay);
+        return () => clearTimeout(nextButtonTimeout);
+    }, []);
 
-        const fadeMessagesTimeout = setTimeout(() => setFadeOutMessages(true), delay);
-        const blackoutTimeout = setTimeout(() => setShowBlackout(true), delay + 1500);
-        const hexleyTimeout = setTimeout(() => {
-            setShowHexley(true);
-            setSpotlight(true);
-        }, delay + 2500);
-
+    useEffect(() => {
         return () => {
-            clearTimeout(fadeMessagesTimeout);
-            clearTimeout(blackoutTimeout);
-            clearTimeout(hexleyTimeout);
+            if (typingIntervalRef.current) clearInterval(typingIntervalRef.current);
+            if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
         };
     }, []);
+
+    useEffect(() => {
+        if (!showHexley || dialogueIndex === 0) return;
+        startTyping(currentLine.text);
+    }, [dialogueIndex, showHexley]);
 
     useEffect(() => {
         if (isLastLine) {
@@ -65,43 +93,50 @@ export default function TransitionScreen({ onComplete }) {
         }
     }, [isLastLine]);
 
-    const audioRef = useRef(null);
+    const beginHexleyDialogue = () => {
+        setShowIntro(false);
+        setShowBlackout(true);
+        setTimeout(() => {
+            setShowHexley(true);
+            setSpotlight(true);
+            startTyping(hexleyLines[0].text);
+        }, 1000);
+    };
 
     const handleNext = () => {
-        if (dialogueIndex === 1 && !audioRef.current) {
+        if (typingIntervalRef.current) clearInterval(typingIntervalRef.current);
+        if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+
+        if (dialogueIndex === 2 && !audioRef.current) {
             const audio = new Audio("/Hexley_Theme.mp3");
-            audio.volume = 0; // start at 0
+            audio.volume = 0;
             audio.loop = true;
-            audio.play().catch((err) => {
-                console.warn("Audio failed to play:", err);
-            });
+            audio.play().catch(() => { });
             audioRef.current = audio;
 
-            // Fade in over 6s to 0.4
             let vol = 0;
             const fadeIn = setInterval(() => {
                 if (vol < 0.4) {
-                    vol += 0.02;
-                    audio.volume = Math.min(vol, 0.4);
+                    vol += 0.0033;
+                    audio.volume = Math.min(vol, 0.1);
                 } else {
                     clearInterval(fadeIn);
                 }
-            }, 200);
+            }, 50);
         }
 
         if (!isLastLine) {
-            setDialogueIndex(dialogueIndex + 1);
+            setDialogueIndex((prev) => prev + 1);
         }
     };
 
     return (
         <div className="fixed inset-0 z-50 bg-black flex flex-col items-center justify-center text-white text-center px-4 overflow-hidden">
-            {/* INTRO TEXT STYLE */}
-            {!fadeOutMessages &&
+            {showIntro &&
                 introMessages.map((message, index) => (
                     <motion.h2
                         key={index}
-                        className="text-2xl md:text-4xl font-bold transition-message leading-tight"
+                        className="text-2xl md:text-4xl font-bold leading-tight"
                         initial={{ opacity: 0, scale: 0.8 }}
                         animate={{ opacity: 1, scale: 1 }}
                         exit={{ opacity: 0 }}
@@ -111,37 +146,26 @@ export default function TransitionScreen({ onComplete }) {
                     </motion.h2>
                 ))}
 
-            {/* Fade out effect */}
-            {fadeOutMessages && !showBlackout && (
-                <motion.div
-                    className="absolute inset-0 bg-black"
-                    initial={{ opacity: 1 }}
-                    animate={{ opacity: 0 }}
+            {(showNextAfterIntro || showHexley) && !isLastLine && (
+                <motion.button
+                    onClick={showHexley ? handleNext : beginHexleyDialogue}
+                    className="fixed bottom-20 px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg z-20"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
                     transition={{ duration: 1 }}
-                />
+                >
+                    Next
+                </motion.button>
             )}
 
-            {/* Blackout before Hexley */}
             {showBlackout && !showHexley && (
-                <motion.div
-                    className="absolute inset-0 bg-black"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ duration: 1 }}
-                />
+                <motion.div className="absolute inset-0 bg-black" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 1 }} />
             )}
 
-            {/* Spotlight background during Hexley */}
             {spotlight && (
-                <motion.div
-                    className="absolute inset-0 bg-black bg-opacity-70 z-0"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ duration: 1 }}
-                />
+                <motion.div className="absolute inset-0 bg-black bg-opacity-70 z-0" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 1 }} />
             )}
 
-            {/* HEXLEY IMAGE - fixed position */}
             {showHexley && currentLine.img && (
                 <motion.img
                     src={`/${currentLine.img}`}
@@ -153,33 +177,18 @@ export default function TransitionScreen({ onComplete }) {
                 />
             )}
 
-            {/* DIALOGUE TEXT - always centered */}
             {showHexley && (
-                <motion.p
+                <motion.div
                     key={dialogueIndex}
-                    className="fixed top-[48%] max-w-[90%] md:max-w-xl text-lg md:text-2xl font-medium z-10"
+                    className="fixed top-[48%] max-w-[90%] md:max-w-xl bg-white text-black px-6 py-4 rounded-xl border-2 border-black shadow-xl text-lg md:text-2xl font-medium z-10"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
-                    transition={{ duration: 1 }}
+                    transition={{ duration: 0.5 }}
                 >
-                    {currentLine.text}
-                </motion.p>
+                    {typedText}
+                </motion.div>
             )}
 
-            {/* NEXT BUTTON - fixed position, centered horizontally */}
-            {showHexley && !isLastLine && (
-                <motion.button
-                    onClick={handleNext}
-                    className="fixed bottom-24 md:bottom-20 px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-all z-20"
-                    initial={{ opacity: 0 }} 
-                    animate={{ opacity: 1 }}
-                    transition={{ duration: 1 }}
-                >
-                    Next
-                </motion.button>
-            )}
-
-            {/* CURTAIN SLIDE */}
             {showCurtain && (
                 <motion.img
                     src="/Curtain.png"
@@ -191,10 +200,26 @@ export default function TransitionScreen({ onComplete }) {
                 />
             )}
 
-            {/* SKIP BUTTON - always bottom */}
-            {showHexley && !isLastLine && showSkip && (
+            {!showCurtain && showSkip && (
                 <motion.button
                     onClick={() => {
+                        if (!audioRef.current) {
+                            const audio = new Audio("/Hexley_Theme.mp3");
+                            audio.volume = 0;
+                            audio.loop = true;
+                            audio.play().catch(err => console.warn("Audio failed:", err));
+                            audioRef.current = audio;
+
+                            let vol = 0;
+                            const fadeIn = setInterval(() => {
+                                if (vol < 0.4) {
+                                    vol += 0.02;
+                                    audio.volume = Math.min(vol, 0.1);
+                                } else {
+                                    clearInterval(fadeIn);
+                                }
+                            }, 200);
+                        }
                         setShowSkip(false);
                         setTimeout(() => onComplete(), 800);
                     }}

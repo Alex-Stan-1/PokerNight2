@@ -1,8 +1,10 @@
 "use client";
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
+import VillainGameDetails from "./VillainGameDetails";
 
 export default function MainPage() {
+    const [showGameDetails, setShowGameDetails] = useState(false);
     const [curtainLifted, setCurtainLifted] = useState(false);
     const [fadeComplete, setFadeComplete] = useState(false);
 
@@ -21,9 +23,12 @@ export default function MainPage() {
         };
     }, []);
 
+    if (showGameDetails) {
+        return <VillainGameDetails />;
+    }
+
     return (
         <div className="relative min-h-screen bg-[#2a143d] text-yellow-100 font-serif flex flex-col items-center justify-center px-4 py-12 overflow-hidden">
-
             {/* Radial shadow + vignette effect */}
             <div className="absolute inset-0 z-0 pointer-events-none">
                 <div className="absolute inset-0 bg-[#3d1a5c]" />
@@ -82,7 +87,10 @@ export default function MainPage() {
                     A night where the wicked gather,<br />
                     and only the most cunning survive.
                 </p>
-                <button className="px-6 sm:px-8 py-3 sm:py-4 bg-pink-700 hover:bg-pink-800 text-white rounded-full text-md sm:text-lg shadow-lg transition-all border border-yellow-300">
+                <button
+                    onClick={() => setShowGameDetails(true)}
+                    className="px-6 sm:px-8 py-3 sm:py-4 bg-pink-700 hover:bg-pink-800 text-white rounded-full text-md sm:text-lg shadow-lg transition-all border border-yellow-300"
+                >
                     Enter the Lair
                 </button>
             </div>
