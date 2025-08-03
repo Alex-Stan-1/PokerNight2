@@ -96,24 +96,40 @@ export default function TransitionScreen({ onComplete }) {
     }, [isLastLine]);
 
     useEffect(() => {
-        const handleVisibilityChange = () => {
-            if (!audioRef.current) return;
-
-            if (document.visibilityState === "hidden") {
+        const pauseAudio = () => {
+            if (audioRef.current && !audioRef.current.paused) {
                 audioRef.current.pause();
-            } else if (document.visibilityState === "visible") {
-                audioRef.current.play().catch(() => {
-                    // Optional: handle if autoplay is blocked
-                });
             }
         };
 
-        document.addEventListener("visibilitychange", handleVisibilityChange);
+        const resumeAudio = () => {
+            if (audioRef.current && audioRef.current.paused) {
+                audioRef.current.play().catch(() => { });
+            }
+        };
+
+        const handleVisibility = () => {
+            if (document.visibilityState === "hidden") {
+                pauseAudio();
+            } else if (document.visibilityState === "visible") {
+                resumeAudio();
+            }
+        };
+
+        document.addEventListener("visibilitychange", handleVisibility);
+        window.addEventListener("blur", pauseAudio);
+        window.addEventListener("focus", resumeAudio);
+        window.addEventListener("pagehide", pauseAudio);
+        window.addEventListener("pageshow", resumeAudio);
+
         return () => {
-            document.removeEventListener("visibilitychange", handleVisibilityChange);
+            document.removeEventListener("visibilitychange", handleVisibility);
+            window.removeEventListener("blur", pauseAudio);
+            window.removeEventListener("focus", resumeAudio);
+            window.removeEventListener("pagehide", pauseAudio);
+            window.removeEventListener("pageshow", resumeAudio);
         };
     }, []);
-
 
     const beginHexleyDialogue = () => {
         setShowIntro(false);
