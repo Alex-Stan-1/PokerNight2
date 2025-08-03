@@ -97,8 +97,14 @@ export default function TransitionScreen({ onComplete }) {
 
     useEffect(() => {
         const handleVisibilityChange = () => {
-            if (document.visibilityState === "hidden" && audioRef.current) {
+            if (!audioRef.current) return;
+
+            if (document.visibilityState === "hidden") {
                 audioRef.current.pause();
+            } else if (document.visibilityState === "visible") {
+                audioRef.current.play().catch(() => {
+                    // Optional: handle if autoplay is blocked
+                });
             }
         };
 
@@ -107,6 +113,7 @@ export default function TransitionScreen({ onComplete }) {
             document.removeEventListener("visibilitychange", handleVisibilityChange);
         };
     }, []);
+
 
     const beginHexleyDialogue = () => {
         setShowIntro(false);
