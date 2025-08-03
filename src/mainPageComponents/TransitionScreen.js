@@ -148,6 +148,8 @@ export default function TransitionScreen({ onComplete }) {
 
         if (dialogueIndex === 1 && !audioRef.current) {
             const audio = new Audio("/Hexley_Theme.mp3");
+            audio.setAttribute("playsinline", "true"); // <-- Add this line
+
             audio.volume = 0;
             audio.loop = true;
             audio.play().catch(() => { });
