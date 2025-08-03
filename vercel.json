@@ -1,0 +1,8 @@
+{
+    "rewrites": [
+        {
+            "source": "/Round2/:path*",
+            "destination": "/:path*"
+        }
+    ]
+}
