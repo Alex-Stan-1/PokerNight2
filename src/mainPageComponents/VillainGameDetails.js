@@ -177,7 +177,7 @@ export default function VillainsInvite() {
                 <section className="text-center py-20 px-6 text-white space-y-6">
                     <h2 className="text-4xl sm:text-5xl font-extrabold text-yellow-400">Welcome</h2>
                     <p className="max-w-3xl mx-auto text-lg sm:text-xl text-gray-300">
-                        You&apos;ve made it to the <span className="text-yellow-500 font-semibold">2nd Stanimal&apos;s Invitational</span> — a night where villainy reigns and poker is the weapon of choice.
+                        Congradulations, You&apos;ve made it to the <br /><span className="text-yellow-500 font-semibold">2nd Stanimal&apos;s Invitational</span> <br />
                     </p>
                 </section>
 
@@ -188,7 +188,7 @@ export default function VillainsInvite() {
                         Texas Hold’em — No buy-in, just good vibes. Drinks are on the house. Pizza’s on me.
                     </p>
                     <div className="space-y-2 text-gray-300 text-md sm:text-lg">
-                        <p>🎭 <span className="text-white font-semibold">Dress Code:</span> Show up as your alias would. Commit to the role.</p>
+                        <p>🎭 <span className="text-white font-semibold">Dress Code:</span> Show up dressed as your villain would. Commit to the role!</p>
                         <p>📍 <span className="text-white font-semibold">Location:</span> 701 Martha Ave, APT 3119, Lancaster, PA 17601</p>
                         <p>⏰ <span className="text-white font-semibold">Start Time:</span> November 14th @ 6:00 PM</p>
                     </div>
