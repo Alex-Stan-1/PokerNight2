@@ -18,6 +18,8 @@ export default function TransitionScreen({ onComplete }) {
         { img: "Hexley_Smug.png", text: "You can call me Hexley. I basically run this place." },
         { img: "Hexley_Puzzled.png", text: "You must really be messed up if you're coming back to one of these..." },
         { img: "Hexley_Smug.png", text: "Hey, want to see something funny?" },
+        { img: "Hexley_Mike.png", text: "I can turn into Mike!" },
+        { img: "Hexley_Smug.png", text: "Hey, want to see something even MORE funny?" },
         { img: "Hexley_Connor.png", text: "I can turn into Connor!" },
         { img: "Hexley_Smug.png", text: "Okay okay. Enough fun." },
         { img: "Hexley_Smug.png", text: "Anyway, I suppose you want to enter again." },
