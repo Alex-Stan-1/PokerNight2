@@ -95,6 +95,19 @@ export default function TransitionScreen({ onComplete }) {
         }
     }, [isLastLine]);
 
+    useEffect(() => {
+        const handleVisibilityChange = () => {
+            if (document.visibilityState === "hidden" && audioRef.current) {
+                audioRef.current.pause();
+            }
+        };
+
+        document.addEventListener("visibilitychange", handleVisibilityChange);
+        return () => {
+            document.removeEventListener("visibilitychange", handleVisibilityChange);
+        };
+    }, []);
+
     const beginHexleyDialogue = () => {
         setShowIntro(false);
         setShowBlackout(true);
