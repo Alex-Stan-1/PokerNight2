@@ -109,7 +109,7 @@ export default function TransitionScreen({ onComplete }) {
         if (typingIntervalRef.current) clearInterval(typingIntervalRef.current);
         if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
 
-        if (dialogueIndex === 2 && !audioRef.current) {
+        if (dialogueIndex === 1 && !audioRef.current) {
             const audio = new Audio("/Hexley_Theme.mp3");
             audio.volume = 0;
             audio.loop = true;
