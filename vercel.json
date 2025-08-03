@@ -1,8 +1,9 @@
 {
-    "rewrites": [
+    "redirects": [
         {
-            "source": "/Round2/:path*",
-            "destination": "/:path*"
+            "source": "/Round1",
+            "destination": "https://poker-night-round1.vercel.app",
+            "permanent": true
         }
     ]
 }
