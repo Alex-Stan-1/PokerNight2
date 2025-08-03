@@ -108,7 +108,7 @@ export default function TransitionScreen({ onComplete }) {
             }
         };
 
-        const handleVisibility = () => {
+        const handleVisibilityChange = () => {
             if (document.visibilityState === "hidden") {
                 pauseAudio();
             } else if (document.visibilityState === "visible") {
@@ -116,20 +116,21 @@ export default function TransitionScreen({ onComplete }) {
             }
         };
 
-        document.addEventListener("visibilitychange", handleVisibility);
-        window.addEventListener("blur", pauseAudio);
-        window.addEventListener("focus", resumeAudio);
-        window.addEventListener("pagehide", pauseAudio);
-        window.addEventListener("pageshow", resumeAudio);
+        const handleBlur = () => pauseAudio();
+        const handleFocus = () => resumeAudio();
+
+        document.addEventListener("visibilitychange", handleVisibilityChange);
+        window.addEventListener("blur", handleBlur);
+        window.addEventListener("focus", handleFocus);
 
         return () => {
-            document.removeEventListener("visibilitychange", handleVisibility);
-            window.removeEventListener("blur", pauseAudio);
-            window.removeEventListener("focus", resumeAudio);
-            window.removeEventListener("pagehide", pauseAudio);
-            window.removeEventListener("pageshow", resumeAudio);
+            document.removeEventListener("visibilitychange", handleVisibilityChange);
+            window.removeEventListener("blur", handleBlur);
+            window.removeEventListener("focus", handleFocus);
         };
     }, []);
+
+
 
     const beginHexleyDialogue = () => {
         setShowIntro(false);
