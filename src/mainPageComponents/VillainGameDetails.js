@@ -72,7 +72,7 @@ function GuestCard({
                         onClick={() => setEditingVillain(true)}
                         className={`w-full ${villain ? "bg-purple-700 hover:bg-purple-800" : "bg-gray-800 hover:bg-gray-700"} text-white px-4 py-2 rounded-lg transition`}
                     >
-                        {villain || "Click here to choose Villain"}
+                        {villain || "Click here to choose Disney Villain"}
                     </button>
                 ) : (
                     <div className="flex flex-col gap-2">
@@ -187,10 +187,18 @@ export default function VillainsInvite() {
                     <p className="max-w-2xl mx-auto text-lg sm:text-xl text-gray-300">
                         Texas Hold’em — No buy-in, just good vibes. Drinks are on the house. Pizza’s on me.
                     </p>
-                    <div className="space-y-2 text-gray-300 text-md sm:text-lg">
-                        <p>🎭 <span className="text-white font-semibold">Dress Code:</span> Show up dressed as your villain would. Commit to the role!</p>
-                        <p>📍 <span className="text-white font-semibold">Location:</span> 701 Martha Ave, APT 3119, Lancaster, PA 17601</p>
-                        <p>⏰ <span className="text-white font-semibold">Start Time:</span> November 14th @ 6:00 PM</p>
+                    <div className="space-y-4 text-gray-300 text-md sm:text-lg bg-[#2e004f]/30 d">
+                        <div>
+                            <p className="text-white font-semibold mb-1">🎭 Dress Code</p>
+                            <p>
+                                Come dressed as your chosen <span className="text-yellow-400 font-semibold">Disney Villain</span>.
+                                You may update your villain before the event—but <span className="text-red-400 font-bold">no duplicates allowed</span>.
+                                Strictly Disney: <span className="text-pink-400 font-semibold">Marvel and Star Wars villains do not count</span>.
+
+                            </p>
+                        </div>
+                        <p>📍 <span className="text-white font-semibold">Location<br/></span> 701 Martha Ave, APT 3119, Lancaster, PA 17601</p>
+                        <p>⏰ <span className="text-white font-semibold">Start Time<br /></span> November 14th @ 6:00 PM</p>
                     </div>
                 </section>
 
