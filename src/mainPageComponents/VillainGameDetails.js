@@ -187,7 +187,7 @@ export default function VillainsInvite() {
                     <p className="max-w-2xl mx-auto text-lg sm:text-xl text-gray-300">
                         Texas Hold’em — No buy-in, just good vibes. Drinks are on the house. Pizza’s on me.
                     </p>
-                    <div className="space-y-4 text-gray-300 text-md sm:text-lg bg-[#2e004f]/30 d">
+                    <div className="space-y-4 text-gray-300 text-md sm:text-lg">
                         <div>
                             <p className="text-white font-semibold mb-1">🎭 Dress Code</p>
                             <p>
