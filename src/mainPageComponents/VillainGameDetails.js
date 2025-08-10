@@ -248,7 +248,7 @@ export default function VillainsInvite() {
                             { name: "Captain Hook", file: "Hexley_Hook" },
                             { name: "Ursula", file: "Hexley_Ursula" },
                             { name: "Cruella", file: "Hexley_Cruella" },
-                            { name: "Aladdin", file: "Hexley_Aladin" },
+                            { name: "Jafar", file: "Hexley_Aladin" },
                             { name: "Lotso", file: "Hexley_Lotso" },
                         ].map(({ name, file }) => (
                             <div key={name} className="max-w-xs">
