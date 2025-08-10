@@ -46,14 +46,11 @@ export default function TransitionScreen({ onComplete }) {
 
     const startTyping = (text) => {
         setTypedText("");
-
         if (typingIntervalRef.current) clearInterval(typingIntervalRef.current);
         if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
-
         const typeSound = new Audio("/Hexley_Typing.mp3");
         typeSound.volume = 0.03;
         typeSound.play().catch(() => { });
-
         typingTimeoutRef.current = setTimeout(() => {
             let charIndex = 0;
             typingIntervalRef.current = setInterval(() => {
@@ -62,18 +59,16 @@ export default function TransitionScreen({ onComplete }) {
                 if (charIndex >= text.length) {
                     clearInterval(typingIntervalRef.current);
                 }
-            }, 30);
-        }, 300);
+            }, 15);
+        }, 150);
     };
 
-    // Reveal Next after intro sequence
     useEffect(() => {
         const delay = introMessages.length * 2000 + 500;
         const nextButtonTimeout = setTimeout(() => setShowNextAfterIntro(true), delay);
         return () => clearTimeout(nextButtonTimeout);
     }, []);
 
-    // Cleanup typing timers on unmount
     useEffect(() => {
         return () => {
             if (typingIntervalRef.current) clearInterval(typingIntervalRef.current);
@@ -81,13 +76,11 @@ export default function TransitionScreen({ onComplete }) {
         };
     }, []);
 
-    // Type current line text (after first line starts)
     useEffect(() => {
         if (!showHexley || dialogueIndex === 0) return;
         startTyping(currentLine.text);
-    }, [dialogueIndex, showHexley]); // eslint-disable-line react-hooks/exhaustive-deps
+    }, [dialogueIndex, showHexley]);
 
-    // Handle audio pause/resume with tab visibility/focus
     useEffect(() => {
         const pauseAudio = () => {
             if (audioRef.current && !audioRef.current.paused) {
@@ -108,11 +101,9 @@ export default function TransitionScreen({ onComplete }) {
         };
         const handleBlur = () => pauseAudio();
         const handleFocus = () => resumeAudio();
-
         document.addEventListener("visibilitychange", handleVisibilityChange);
         window.addEventListener("blur", handleBlur);
         window.addEventListener("focus", handleFocus);
-
         return () => {
             document.removeEventListener("visibilitychange", handleVisibilityChange);
             window.removeEventListener("blur", handleBlur);
@@ -142,13 +133,10 @@ export default function TransitionScreen({ onComplete }) {
     };
 
     const handleNext = () => {
-        // If we're still typing this line, fast-forward to completion (no advance)
         if (showHexley && !isTextFullyTyped()) {
             fastForwardText();
             return;
         }
-
-        // Manage audio start at early dialogue
         if (dialogueIndex === 1 && !audioRef.current) {
             const audio = new Audio("/Hexley_Theme.mp3");
             audio.setAttribute("playsinline", "true");
@@ -156,7 +144,6 @@ export default function TransitionScreen({ onComplete }) {
             audio.loop = true;
             audio.play().catch(() => { });
             audioRef.current = audio;
-
             let vol = 0;
             const fadeIn = setInterval(() => {
                 if (vol < 0.4) {
@@ -167,19 +154,15 @@ export default function TransitionScreen({ onComplete }) {
                 }
             }, 50);
         }
-
         if (!showHexley) {
-            // Starting the dialogue from the intro
             beginHexleyDialogue();
             return;
         }
-
-        // If the text is fully typed, advance (or curtain on last line)
         if (!isLastLine) {
             setDialogueIndex((prev) => prev + 1);
         } else {
             setShowCurtain(true);
-            const COMPLETE_DELAY_MS = 2500; // curtain anim ~2s + buffer
+            const COMPLETE_DELAY_MS = 2500;
             setTimeout(() => onComplete(), COMPLETE_DELAY_MS);
         }
     };
@@ -199,7 +182,6 @@ export default function TransitionScreen({ onComplete }) {
                         {message}
                     </motion.h2>
                 ))}
-
             {(showNextAfterIntro || showHexley) && !showCurtain && (
                 <motion.button
                     onClick={handleNext}
@@ -211,7 +193,6 @@ export default function TransitionScreen({ onComplete }) {
                     Next
                 </motion.button>
             )}
-
             {showBlackout && !showHexley && (
                 <motion.div
                     className="absolute inset-0 bg-black"
@@ -220,7 +201,6 @@ export default function TransitionScreen({ onComplete }) {
                     transition={{ duration: 1 }}
                 />
             )}
-
             {spotlight && (
                 <motion.div
                     className="absolute inset-0 bg-black bg-opacity-70 z-0"
@@ -229,7 +209,6 @@ export default function TransitionScreen({ onComplete }) {
                     transition={{ duration: 1 }}
                 />
             )}
-
             {showHexley && currentLine.img && (
                 <motion.img
                     src={`/${currentLine.img}`}
@@ -240,7 +219,6 @@ export default function TransitionScreen({ onComplete }) {
                     transition={{ duration: 1 }}
                 />
             )}
-
             {showHexley && (
                 <motion.div
                     key={dialogueIndex}
@@ -252,7 +230,6 @@ export default function TransitionScreen({ onComplete }) {
                     {typedText}
                 </motion.div>
             )}
-
             {showCurtain && (
                 <motion.img
                     src="/Curtain.png"
@@ -263,7 +240,6 @@ export default function TransitionScreen({ onComplete }) {
                     transition={{ duration: 2, ease: "easeInOut" }}
                 />
             )}
-
             {!showCurtain && showSkip && (
                 <motion.button
                     onClick={() => {
@@ -273,7 +249,6 @@ export default function TransitionScreen({ onComplete }) {
                             audio.loop = true;
                             audio.play().catch(err => console.warn("Audio failed:", err));
                             audioRef.current = audio;
-
                             let vol = 0;
                             const fadeIn = setInterval(() => {
                                 if (vol < 0.4) {
@@ -285,7 +260,9 @@ export default function TransitionScreen({ onComplete }) {
                             }, 200);
                         }
                         setShowSkip(false);
-                        setTimeout(() => onComplete(), 800);
+                        setShowCurtain(true);
+                        const DROP_MS = 2000;
+                        setTimeout(() => onComplete(), DROP_MS + 100);
                     }}
                     className="fixed bottom-6 px-6 py-3 text-lg bg-[#d4af37] text-black rounded-lg shadow-md hover:bg-[#b8972d] transition-all z-50"
                     initial={{ opacity: 0 }}
