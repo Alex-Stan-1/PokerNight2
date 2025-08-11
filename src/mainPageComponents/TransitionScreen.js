@@ -182,7 +182,8 @@ export default function TransitionScreen({ onComplete }) {
                         {message}
                     </motion.h2>
                 ))}
-            {(showNextAfterIntro || showHexley) && !showCurtain && (
+
+            {!showCurtain && (
                 <motion.button
                     onClick={handleNext}
                     className="fixed bottom-20 px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg z-20"
@@ -193,6 +194,7 @@ export default function TransitionScreen({ onComplete }) {
                     Next
                 </motion.button>
             )}
+
             {showBlackout && !showHexley && (
                 <motion.div
                     className="absolute inset-0 bg-black"
@@ -201,6 +203,7 @@ export default function TransitionScreen({ onComplete }) {
                     transition={{ duration: 1 }}
                 />
             )}
+
             {spotlight && (
                 <motion.div
                     className="absolute inset-0 bg-black bg-opacity-70 z-0"
@@ -209,9 +212,10 @@ export default function TransitionScreen({ onComplete }) {
                     transition={{ duration: 1 }}
                 />
             )}
+
             {showHexley && currentLine.img && (
                 <motion.img
-                    src={/${currentLine.img}}
+                    src={`/${currentLine.img}`}
                     alt="Hexley"
                     className="fixed top-[18%] w-36 md:w-44 z-10"
                     initial={{ opacity: 0 }}
@@ -219,6 +223,7 @@ export default function TransitionScreen({ onComplete }) {
                     transition={{ duration: 1 }}
                 />
             )}
+
             {showHexley && (
                 <motion.div
                     key={dialogueIndex}
@@ -230,6 +235,7 @@ export default function TransitionScreen({ onComplete }) {
                     {typedText}
                 </motion.div>
             )}
+
             {showCurtain && (
                 <motion.img
                     src="/Curtain.png"
@@ -240,6 +246,7 @@ export default function TransitionScreen({ onComplete }) {
                     transition={{ duration: 2, ease: "easeInOut" }}
                 />
             )}
+
             {!showCurtain && showSkip && (
                 <motion.button
                     onClick={() => {
