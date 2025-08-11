@@ -48,9 +48,11 @@ export default function TransitionScreen({ onComplete }) {
         setTypedText("");
         if (typingIntervalRef.current) clearInterval(typingIntervalRef.current);
         if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+
         const typeSound = new Audio("/Hexley_Typing.mp3");
         typeSound.volume = 0.03;
         typeSound.play().catch(() => { });
+
         typingTimeoutRef.current = setTimeout(() => {
             let charIndex = 0;
             typingIntervalRef.current = setInterval(() => {
@@ -60,7 +62,7 @@ export default function TransitionScreen({ onComplete }) {
                     clearInterval(typingIntervalRef.current);
                 }
             }, 15);
-        }, 150);
+        }, 600); // delay typing to match audio lead-in
     };
 
     useEffect(() => {
@@ -182,6 +184,16 @@ export default function TransitionScreen({ onComplete }) {
                         {message}
                     </motion.h2>
                 ))}
+
+            {showIntro && !showCurtain && (
+                <button
+                    onClick={beginHexleyDialogue}
+                    className="fixed top-4 right-4 px-3 py-1.5 text-sm rounded-md bg-white/10 hover:bg-white/15 border border-white/20 z-50"
+                >
+                    Skip Narration
+                </button>
+            )}
+
             {(showNextAfterIntro || showHexley) && !showCurtain && (
                 <motion.button
                     onClick={handleNext}
@@ -193,6 +205,7 @@ export default function TransitionScreen({ onComplete }) {
                     Next
                 </motion.button>
             )}
+
             {showBlackout && !showHexley && (
                 <motion.div
                     className="absolute inset-0 bg-black"
@@ -201,6 +214,7 @@ export default function TransitionScreen({ onComplete }) {
                     transition={{ duration: 1 }}
                 />
             )}
+
             {spotlight && (
                 <motion.div
                     className="absolute inset-0 bg-black bg-opacity-70 z-0"
@@ -209,6 +223,7 @@ export default function TransitionScreen({ onComplete }) {
                     transition={{ duration: 1 }}
                 />
             )}
+
             {showHexley && currentLine.img && (
                 <motion.img
                     src={`/${currentLine.img}`}
@@ -219,6 +234,7 @@ export default function TransitionScreen({ onComplete }) {
                     transition={{ duration: 1 }}
                 />
             )}
+
             {showHexley && (
                 <motion.div
                     key={dialogueIndex}
@@ -230,6 +246,7 @@ export default function TransitionScreen({ onComplete }) {
                     {typedText}
                 </motion.div>
             )}
+
             {showCurtain && (
                 <motion.img
                     src="/Curtain.png"
@@ -240,6 +257,7 @@ export default function TransitionScreen({ onComplete }) {
                     transition={{ duration: 2, ease: "easeInOut" }}
                 />
             )}
+
             {!showCurtain && showSkip && (
                 <motion.button
                     onClick={() => {

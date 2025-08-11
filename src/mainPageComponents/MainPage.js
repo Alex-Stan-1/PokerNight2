@@ -18,6 +18,18 @@ export default function MainPage() {
         };
     }, []);
 
+    // Prevent page scroll while this screen is shown (restored on unmount)
+    useEffect(() => {
+        const prevOverflow = document.body.style.overflow;
+        const prevOverscroll = document.body.style.overscrollBehavior;
+        document.body.style.overflow = "hidden";
+        document.body.style.overscrollBehavior = "none";
+        return () => {
+            document.body.style.overflow = prevOverflow;
+            document.body.style.overscrollBehavior = prevOverscroll;
+        };
+    }, []);
+
     const handleEnter = () => {
         setStartTransition(true);
         setTimeout(() => setShowGameDetails(true), 1500);
@@ -26,7 +38,10 @@ export default function MainPage() {
     if (showGameDetails) return <VillainGameDetails />;
 
     return (
-        <div className="relative min-h-screen text-white font-serif bg-gradient-to-br from-[#1b0034] via-[#2e004f] to-[#420024] flex flex-col items-center justify-center px-4 py-16 overflow-hidden">
+        <div
+            className="relative text-white font-serif bg-gradient-to-br from-[#1b0034] via-[#2e004f] to-[#420024] flex items-center justify-center px-4 overflow-hidden overscroll-none"
+            style={{ height: "100dvh" }} // use dynamic viewport height to avoid mobile browser chrome jumps
+        >
             <div className="absolute inset-0 z-0 pointer-events-none">
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.05)_0%,transparent_70%)]" />
                 <div className="absolute inset-0 bg-black opacity-20" style={{ mixBlendMode: "multiply" }} />
@@ -60,9 +75,10 @@ export default function MainPage() {
                 initial={{ y: "0%" }}
                 animate={{ y: curtainLifted ? "-100%" : "0%" }}
                 transition={{ duration: 2, ease: "easeInOut" }}
+                draggable={false}
             />
 
-            <div className="fixed bottom-2 sm:bottom-6 left-1/2 transform -translate-x-1/2 flex flex-col items-center z-30 w-full px-2 sm:px-0">
+            <div className="fixed bottom-2 sm:bottom-6 left-1/2 -translate-x-1/2 flex flex-col items-center z-30 w-full px-2 sm:px-0">
                 <motion.div
                     className="bg-yellow-100 text-purple-900 px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl shadow-lg text-xs sm:text-sm md:text-base font-medium border border-fuchsia-700 mb-2 sm:mb-3 text-center max-w-xs sm:max-w-none"
                     initial={{ opacity: 0 }}
@@ -78,15 +94,16 @@ export default function MainPage() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 3.5, duration: 1.2 }}
+                    draggable={false}
                 />
             </div>
 
-            <div className="relative z-20 text-center w-full max-w-2xl mt-16 sm:mt-10 px-2">
+            {/* Center content (removed extra top/bottom margins to prevent overflow) */}
+            <div className="relative z-20 text-center w-full max-w-2xl px-2">
                 <h1 className="text-3xl sm:text-5xl md:text-6xl font-extrabold text-yellow-400 mb-4 sm:mb-6 drop-shadow-[0_0_12px_rgba(255,215,0,0.3)]">
                     The Villain’s Gambit
                 </h1>
-                <p className="text-base sm:text-xl md:text-2xl text-gray-300 mb-6 sm:mb-10 leading-relaxed">
-                </p>
+                <p className="text-base sm:text-xl md:text-2xl text-gray-300 mb-6 sm:mb-8 leading-relaxed" />
                 <button
                     onClick={handleEnter}
                     className="px-6 py-2.5 sm:px-8 sm:py-3 bg-purple-700 hover:bg-purple-800 text-white rounded-full text-sm sm:text-lg shadow-md border border-yellow-300 transition"
