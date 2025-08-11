@@ -135,6 +135,8 @@ export default function TransitionScreen({ onComplete }) {
         }
     };
 
+    const showAdvanceCue = showHexley && isTextFullyTyped();
+
     return (
         <div className="fixed inset-0 z-50 bg-black flex flex-col items-center justify-center text-white text-center px-4 overflow-hidden">
             {showIntro &&
@@ -195,14 +197,31 @@ export default function TransitionScreen({ onComplete }) {
             {showHexley && (
                 <motion.div
                     key={dialogueIndex}
-                    className="fixed top-[48%] max-w-[90%] md:max-w-xl bg-white text-black px-6 py-4 rounded-xl border-2 border-black shadow-xl text-lg md:text-2xl font-medium z-10"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ duration: 0.5 }}
+                    className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[min(92vw,46rem)] z-20"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.4 }}
                 >
-                    {typedText}
+                    <div className="relative rounded-2xl border-2 border-purple-600 bg-white text-black px-5 py-4 md:px-6 md:py-5 shadow-[0_10px_40px_rgba(0,0,0,0.35)]">
+                        {/* Nameplate */}
+                        <div className="absolute -top-3 left-6 rounded-full border border-yellow-300/70 bg-yellow-300 px-3 py-0.5 text-[10px] md:text-xs font-extrabold tracking-[0.14em] text-purple-900 shadow">
+                            HEXLEY
+                        </div>
+
+                        {/* Text + caret */}
+                        <div className="text-base md:text-xl leading-relaxed font-medium">
+                            <span>{typedText}</span>
+                            {typedText.length < (hexleyLines[dialogueIndex]?.text ?? "").length && (
+                                <span className="ml-1 align-baseline opacity-70 animate-pulse">▌</span>
+                            )}
+                        </div>
+
+                        {/* Right pointer triangle (aligned & centered) */}
+                       
+                    </div>
                 </motion.div>
             )}
+
 
             {showCurtain && (
                 <motion.img
