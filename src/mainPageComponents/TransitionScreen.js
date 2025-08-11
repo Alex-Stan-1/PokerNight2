@@ -183,7 +183,7 @@ export default function TransitionScreen({ onComplete }) {
                     </motion.h2>
                 ))}
 
-            {!showCurtain && (
+            {(showNextAfterIntro || showHexley) && !showCurtain && (
                 <motion.button
                     onClick={handleNext}
                     className="fixed bottom-20 px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg z-20"
