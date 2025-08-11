@@ -45,6 +45,7 @@ export default function TransitionScreen({ onComplete }) {
     const typingTimeoutRef = useRef(null);
 
     const bgm = useGlobalBgm("/Hexley_Theme.mp3");
+    const bgmStartedRef = useRef(false);
 
     const startTyping = (text) => {
         setTypedText("");
@@ -88,15 +89,6 @@ export default function TransitionScreen({ onComplete }) {
     const beginHexleyDialogue = async () => {
         setShowIntro(false);
         setShowBlackout(true);
-
-        // First *gesture* — safe to start audio
-        try {
-            await bgm?.play();
-            bgm?.fadeTo(0.12, 800);
-        } catch (e) {
-            console.warn("BGM play failed:", e);
-        }
-
         setTimeout(() => {
             setShowHexley(true);
             setSpotlight(true);
@@ -115,29 +107,28 @@ export default function TransitionScreen({ onComplete }) {
         setTypedText(currentLine.text);
     };
 
+    const maybeStartBgmForNextLine = async (nextIndex) => {
+        const nextLine = hexleyLines[nextIndex];
+        if (!bgmStartedRef.current && nextLine?.img) {
+            await bgm?.play();
+            bgm?.fadeTo(0.12, 800);
+            bgmStartedRef.current = true;
+        }
+    };
+
     const handleNext = async () => {
         if (showHexley && !isTextFullyTyped()) {
             fastForwardText();
             return;
         }
-
-        // If for any reason bgm isn't playing yet, start it now on this click
-        if (!(bgm?.isPlaying?.())) {
-            try {
-                await bgm?.play();
-                bgm?.fadeTo(0.12, 800);
-            } catch (e) {
-                console.warn("BGM play failed:", e);
-            }
-        }
-
         if (!showHexley) {
             await beginHexleyDialogue();
             return;
         }
-
         if (!isLastLine) {
-            setDialogueIndex((prev) => prev + 1);
+            const nextIndex = dialogueIndex + 1;
+            await maybeStartBgmForNextLine(nextIndex);
+            setDialogueIndex(nextIndex);
         } else {
             setShowCurtain(true);
             setTimeout(() => onComplete(), 2500);
@@ -227,12 +218,9 @@ export default function TransitionScreen({ onComplete }) {
             {!showCurtain && showSkip && (
                 <motion.button
                     onClick={async () => {
-                        try {
-                            await bgm?.play();
-                            bgm?.fadeTo(0.12, 400);
-                        } catch (e) {
-                            console.warn("BGM play failed:", e);
-                        }
+                        await bgm?.play();
+                        bgm?.fadeTo(0.12, 800);
+                        bgmStartedRef.current = true;
                         setShowSkip(false);
                         setShowCurtain(true);
                         setTimeout(() => onComplete(), 2100);
