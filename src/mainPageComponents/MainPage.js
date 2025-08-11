@@ -2,12 +2,15 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useEffect, useState } from "react";
 import VillainGameDetails from "./VillainGameDetails";
+import useGlobalBgm from "../utils/useGlobalBgm";
 
 export default function MainPage() {
     const [showGameDetails, setShowGameDetails] = useState(false);
     const [curtainLifted, setCurtainLifted] = useState(false);
     const [fadeComplete, setFadeComplete] = useState(false);
     const [startTransition, setStartTransition] = useState(false);
+
+    const bgm = useGlobalBgm("/Hexley_Theme.mp3");
 
     useEffect(() => {
         const fadeTimeout = setTimeout(() => setFadeComplete(true), 1500);
@@ -19,14 +22,12 @@ export default function MainPage() {
     }, []);
 
     useEffect(() => {
-        // Load Inter to match the details page
         const link = document.createElement("link");
         link.href = "https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap";
         link.rel = "stylesheet";
         document.head.appendChild(link);
     }, []);
 
-    // Lock scroll while MainPage is visible; restore on unmount or when details open
     useEffect(() => {
         if (showGameDetails) return;
 
@@ -54,6 +55,11 @@ export default function MainPage() {
         };
     }, [showGameDetails]);
 
+    useEffect(() => {
+        bgm?.play();
+        bgm?.fadeTo(0.12, 200);
+    }, [bgm]);
+
     const handleEnter = () => {
         setStartTransition(true);
         setTimeout(() => setShowGameDetails(true), 1500);
@@ -63,7 +69,6 @@ export default function MainPage() {
 
     return (
         <div className="fixed inset-0 overflow-hidden font-[Inter] text-white">
-            {/* Background to match Details page vibe */}
             <div className="pointer-events-none absolute inset-0 -z-10">
                 <div className="absolute inset-0 bg-gradient-to-br from-[#0b001a] via-[#21002f] to-[#3a042a]" />
                 <div className="absolute inset-0 bg-[radial-gradient(60%_60%_at_50%_30%,rgba(255,0,180,0.16),transparent)]" />
@@ -86,7 +91,6 @@ export default function MainPage() {
                 />
             </div>
 
-            {/* Fade-in overlay */}
             {!fadeComplete && (
                 <motion.div
                     className="absolute inset-0 bg-black z-10"
@@ -96,7 +100,6 @@ export default function MainPage() {
                 />
             )}
 
-            {/* Transition to details */}
             <AnimatePresence>
                 {startTransition && (
                     <motion.div
@@ -109,7 +112,6 @@ export default function MainPage() {
                 )}
             </AnimatePresence>
 
-            {/* Curtain */}
             <motion.img
                 src="/Curtain.png"
                 alt="Curtain"
@@ -119,7 +121,6 @@ export default function MainPage() {
                 transition={{ duration: 2, ease: "easeInOut" }}
             />
 
-            {/* Bottom chip + hook image (kept same content) */}
             <div className="fixed bottom-2 sm:bottom-6 left-1/2 -translate-x-1/2 flex flex-col items-center z-30 w-full px-3">
                 <motion.div
                     className="rounded-xl border border-white/10 bg-white/10 backdrop-blur-xl px-3 sm:px-4 py-1.5 sm:py-2 shadow-lg text-xs sm:text-sm md:text-base font-medium text-yellow-100"
@@ -139,7 +140,6 @@ export default function MainPage() {
                 />
             </div>
 
-            {/* Hero glass card to match details page */}
             <div className="relative z-20 h-full w-full flex items-center justify-center px-4">
                 <div className="w-full max-w-3xl">
                     <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-white/5 backdrop-blur-xl p-8 sm:p-12 text-center">
@@ -168,7 +168,6 @@ export default function MainPage() {
                             </button>
                         </motion.div>
 
-                        {/* soft ring/glow */}
                         <div className="pointer-events-none absolute inset-0 rounded-3xl ring-1 ring-inset ring-white/10" />
                     </div>
                 </div>

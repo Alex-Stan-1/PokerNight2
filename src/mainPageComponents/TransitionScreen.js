@@ -1,6 +1,7 @@
 "use client";
 import { motion } from "framer-motion";
 import { useEffect, useState, useRef } from "react";
+import useGlobalBgm from "../utils/useGlobalBgm";
 
 export default function TransitionScreen({ onComplete }) {
     const introMessages = [
@@ -40,17 +41,20 @@ export default function TransitionScreen({ onComplete }) {
     const currentLine = hexleyLines[dialogueIndex];
     const isLastLine = dialogueIndex === hexleyLines.length - 1;
 
-    const audioRef = useRef(null);
     const typingIntervalRef = useRef(null);
     const typingTimeoutRef = useRef(null);
+
+    const bgm = useGlobalBgm("/Hexley_Theme.mp3");
 
     const startTyping = (text) => {
         setTypedText("");
         if (typingIntervalRef.current) clearInterval(typingIntervalRef.current);
         if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+
         const typeSound = new Audio("/Hexley_Typing.mp3");
         typeSound.volume = 0.03;
         typeSound.play().catch(() => { });
+
         typingTimeoutRef.current = setTimeout(() => {
             let charIndex = 0;
             typingIntervalRef.current = setInterval(() => {
@@ -79,41 +83,20 @@ export default function TransitionScreen({ onComplete }) {
     useEffect(() => {
         if (!showHexley || dialogueIndex === 0) return;
         startTyping(currentLine.text);
-    }, [dialogueIndex, showHexley]);
+    }, [dialogueIndex, showHexley]); // eslint-disable-line react-hooks/exhaustive-deps
 
-    useEffect(() => {
-        const pauseAudio = () => {
-            if (audioRef.current && !audioRef.current.paused) {
-                audioRef.current.pause();
-            }
-        };
-        const resumeAudio = () => {
-            if (audioRef.current && audioRef.current.paused) {
-                audioRef.current.play().catch(() => { });
-            }
-        };
-        const handleVisibilityChange = () => {
-            if (document.visibilityState === "hidden") {
-                pauseAudio();
-            } else if (document.visibilityState === "visible") {
-                resumeAudio();
-            }
-        };
-        const handleBlur = () => pauseAudio();
-        const handleFocus = () => resumeAudio();
-        document.addEventListener("visibilitychange", handleVisibilityChange);
-        window.addEventListener("blur", handleBlur);
-        window.addEventListener("focus", handleFocus);
-        return () => {
-            document.removeEventListener("visibilitychange", handleVisibilityChange);
-            window.removeEventListener("blur", handleBlur);
-            window.removeEventListener("focus", handleFocus);
-        };
-    }, []);
-
-    const beginHexleyDialogue = () => {
+    const beginHexleyDialogue = async () => {
         setShowIntro(false);
         setShowBlackout(true);
+
+        // First *gesture* — safe to start audio
+        try {
+            await bgm?.play();
+            bgm?.fadeTo(0.12, 800);
+        } catch (e) {
+            console.warn("BGM play failed:", e);
+        }
+
         setTimeout(() => {
             setShowHexley(true);
             setSpotlight(true);
@@ -132,38 +115,32 @@ export default function TransitionScreen({ onComplete }) {
         setTypedText(currentLine.text);
     };
 
-    const handleNext = () => {
+    const handleNext = async () => {
         if (showHexley && !isTextFullyTyped()) {
             fastForwardText();
             return;
         }
-        if (dialogueIndex === 1 && !audioRef.current) {
-            const audio = new Audio("/Hexley_Theme.mp3");
-            audio.setAttribute("playsinline", "true");
-            audio.volume = 0;
-            audio.loop = true;
-            audio.play().catch(() => { });
-            audioRef.current = audio;
-            let vol = 0;
-            const fadeIn = setInterval(() => {
-                if (vol < 0.4) {
-                    vol += 0.0033;
-                    audio.volume = Math.min(vol, 0.1);
-                } else {
-                    clearInterval(fadeIn);
-                }
-            }, 50);
+
+        // If for any reason bgm isn't playing yet, start it now on this click
+        if (!(bgm?.isPlaying?.())) {
+            try {
+                await bgm?.play();
+                bgm?.fadeTo(0.12, 800);
+            } catch (e) {
+                console.warn("BGM play failed:", e);
+            }
         }
+
         if (!showHexley) {
-            beginHexleyDialogue();
+            await beginHexleyDialogue();
             return;
         }
+
         if (!isLastLine) {
             setDialogueIndex((prev) => prev + 1);
         } else {
             setShowCurtain(true);
-            const COMPLETE_DELAY_MS = 2500;
-            setTimeout(() => onComplete(), COMPLETE_DELAY_MS);
+            setTimeout(() => onComplete(), 2500);
         }
     };
 
@@ -249,27 +226,16 @@ export default function TransitionScreen({ onComplete }) {
 
             {!showCurtain && showSkip && (
                 <motion.button
-                    onClick={() => {
-                        if (!audioRef.current) {
-                            const audio = new Audio("/Hexley_Theme.mp3");
-                            audio.volume = 0;
-                            audio.loop = true;
-                            audio.play().catch(err => console.warn("Audio failed:", err));
-                            audioRef.current = audio;
-                            let vol = 0;
-                            const fadeIn = setInterval(() => {
-                                if (vol < 0.4) {
-                                    vol += 0.02;
-                                    audio.volume = Math.min(vol, 0.1);
-                                } else {
-                                    clearInterval(fadeIn);
-                                }
-                            }, 200);
+                    onClick={async () => {
+                        try {
+                            await bgm?.play();
+                            bgm?.fadeTo(0.12, 400);
+                        } catch (e) {
+                            console.warn("BGM play failed:", e);
                         }
                         setShowSkip(false);
                         setShowCurtain(true);
-                        const DROP_MS = 2000;
-                        setTimeout(() => onComplete(), DROP_MS + 100);
+                        setTimeout(() => onComplete(), 2100);
                     }}
                     className="fixed bottom-6 px-6 py-3 text-lg bg-[#d4af37] text-black rounded-lg shadow-md hover:bg-[#b8972d] transition-all z-50"
                     initial={{ opacity: 0 }}
