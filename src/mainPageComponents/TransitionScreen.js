@@ -48,11 +48,9 @@ export default function TransitionScreen({ onComplete }) {
         setTypedText("");
         if (typingIntervalRef.current) clearInterval(typingIntervalRef.current);
         if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
-
         const typeSound = new Audio("/Hexley_Typing.mp3");
         typeSound.volume = 0.03;
         typeSound.play().catch(() => { });
-
         typingTimeoutRef.current = setTimeout(() => {
             let charIndex = 0;
             typingIntervalRef.current = setInterval(() => {
@@ -62,7 +60,7 @@ export default function TransitionScreen({ onComplete }) {
                     clearInterval(typingIntervalRef.current);
                 }
             }, 15);
-        }, 600); // delay typing to match audio lead-in
+        }, 150);
     };
 
     useEffect(() => {
@@ -194,7 +192,7 @@ export default function TransitionScreen({ onComplete }) {
                 </button>
             )}
 
-            {(showNextAfterIntro || showHexley) && !showCurtain && (
+            {(showHexley || (showNextAfterIntro && !showHexley)) && !showCurtain && (
                 <motion.button
                     onClick={handleNext}
                     className="fixed bottom-20 px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg z-20"
