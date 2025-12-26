@@ -50,7 +50,7 @@ export default function TransitionScreen({ onComplete }) {
         if (typingIntervalRef.current) clearInterval(typingIntervalRef.current);
         if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
 
-        const typeSound = new Audio("/Hexley_Typing.mp3");
+        const typeSound = new Audio("/Hexley_Typing.mp4");
         typeSound.volume = 0.03;
         typeSound.loop = false;
         typeSound.play().catch(() => { });
