@@ -24,12 +24,12 @@ function GuestCard({
     id,
     name,
     status,
-    villain,
+    characterChoice,
     onStatusChange,
-    onVillainChange,
-    onVillainSubmit,
-    isEditingVillain,
-    setEditingVillain,
+    onCharacterChange,
+    onCharacterSubmit,
+    isEditingCharacter,
+    setEditingCharacter,
     isDropdownOpen,
     setDropdownOpen,
 }) {
@@ -70,9 +70,10 @@ function GuestCard({
                         </span>
                         <span>{name}</span>
                     </div>
+
                     {/* little signal dot like a lap light */}
                     <div
-                        className={`h-2 w-2 rounded-full shadow-[0_0_10px_rgba(255,255,255,0.8)] ${status === "Accepted"
+                        className={`h-2 w-2 rounded-full shadow-[0_0_10px_rgba(255,255,255,0.8)] ${status === "Confirmed"
                                 ? "bg-emerald-400"
                                 : status === "Declined"
                                     ? "bg-red-400"
@@ -89,9 +90,7 @@ function GuestCard({
                         aria-haspopup="listbox"
                         aria-expanded={isDropdownOpen}
                     >
-                        <span className="text-sm">
-                            {status || "Select status (on the grid?)"}
-                        </span>
+                        <span className="text-sm">{status || "Select status (on the grid?)"}</span>
                         <svg className="h-4 w-4 opacity-70" viewBox="0 0 20 20" fill="currentColor">
                             <path d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.08 1.04l-4.25 4.25a.75.75 0 01-1.06 0L5.21 8.27a.75.75 0 01.02-1.06z" />
                         </svg>
@@ -107,12 +106,10 @@ function GuestCard({
                                 className="absolute z-[999] mt-2 w-full overflow-hidden rounded-xl border border-white/15 bg-[#050814] shadow-2xl"
                                 role="listbox"
                             >
-                                {["Pending", "Accepted", "Declined"].map((s) => (
+                                {["Pending", "Confirmed", "Declined"].map((s) => (
                                     <button
                                         key={s}
-                                        className={`w-full px-4 py-2.5 text-left text-sm transition hover:bg-white/5 ${status === s
-                                                ? "text-yellow-300 font-semibold"
-                                                : "text-white"
+                                        className={`w-full px-4 py-2.5 text-left text-sm transition hover:bg-white/5 ${status === s ? "text-yellow-300 font-semibold" : "text-white"
                                             }`}
                                         onClick={() => {
                                             setDropdownOpen(false);
@@ -129,32 +126,32 @@ function GuestCard({
                     </AnimatePresence>
                 </div>
 
-                {/* Racer editor (stored as "Villain" field) */}
-                {!isEditingVillain ? (
+                {/* Character editor (stored as "Character" field) */}
+                {!isEditingCharacter ? (
                     <button
-                        onClick={() => setEditingVillain(true)}
-                        className={`w-full rounded-xl px-4 py-2.5 text-sm transition border ${villain
+                        onClick={() => setEditingCharacter(true)}
+                        className={`w-full rounded-xl px-4 py-2.5 text-sm transition border ${characterChoice
                                 ? "border-blue-400/60 bg-blue-700/25 hover:bg-blue-700/40"
                                 : "border-white/15 bg-white/5 hover:bg-white/10"
                             } text-white`}
-                        title="Choose your racer"
+                        title="Choose your character"
                     >
-                        {villain || "Click here to choose your Mario Kart main"}
+                        {characterChoice || "Click here to choose who you’ll dress as"}
                     </button>
                 ) : (
                     <div className="flex flex-col gap-2">
                         <input
                             type="text"
                             className="rounded-lg border border-white/15 bg-black/50 px-3 py-2 text-sm text-white placeholder-white/40 outline-none focus:ring-2 focus:ring-blue-400/60"
-                            placeholder="Enter your Mario Kart main (e.g. Yoshi, Peach, Toad)"
-                            value={villain}
-                            onChange={(e) => onVillainChange(id, e.target.value)}
+                            placeholder="Enter your character (e.g. Mario, Peach, Yoshi)"
+                            value={characterChoice}
+                            onChange={(e) => onCharacterChange(id, e.target.value)}
                         />
                         <div className="flex gap-2">
                             <button
                                 onClick={() => {
-                                    onVillainSubmit(id);
-                                    setEditingVillain(false);
+                                    onCharacterSubmit(id);
+                                    setEditingCharacter(false);
                                 }}
                                 className="rounded-lg bg-emerald-600 px-4 py-1.5 text-sm text-white hover:bg-emerald-700"
                             >
@@ -162,8 +159,8 @@ function GuestCard({
                             </button>
                             <button
                                 onClick={() => {
-                                    onVillainChange(id, "");
-                                    setEditingVillain(false);
+                                    onCharacterChange(id, "");
+                                    setEditingCharacter(false);
                                 }}
                                 className="rounded-lg bg-white/10 px-4 py-1.5 text-sm text-white hover:bg-white/20"
                             >
@@ -180,48 +177,92 @@ function GuestCard({
 /* --------------------------- Main Component --------------------------- */
 export default function VillainGameDetails() {
     const [guests, setGuests] = useState([]);
-    const [villainEdits, setVillainEdits] = useState({});
-    const [editingVillainStates, setEditingVillainStates] = useState({});
+    const [characterEdits, setCharacterEdits] = useState({});
+    const [editingCharacterStates, setEditingCharacterStates] = useState({});
     const [statusDropdownStates, setStatusDropdownStates] = useState({});
+
+    // Keep a ref to the single global music instance
+    const bgmRef = useRef(null);
 
     // font
     useEffect(() => {
         const link = document.createElement("link");
-        link.href =
-            "https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap";
+        link.href = "https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap";
         link.rel = "stylesheet";
         document.head.appendChild(link);
     }, []);
 
-    // firestore subscription
+    // ✅ Start (or reuse) the Mario Kart World music ON THIS PAGE and KEEP IT PLAYING
     useEffect(() => {
-        const unsub = onSnapshot(collection(db, "villains"), (snapshot) => {
-            const data = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
-            setGuests(data);
-            setVillainEdits(
-                Object.fromEntries(data.map(({ id, Villain }) => [id, Villain || ""]))
-            );
-        });
+        if (typeof window === "undefined") return;
+
+        // Reuse existing
+        if (window.__marioBgm) {
+            bgmRef.current = window.__marioBgm;
+            try {
+                bgmRef.current.loop = true;
+                bgmRef.current.volume = 0.12;
+                bgmRef.current.play().catch(() => { });
+            } catch { }
+            return;
+        }
+
+        // Create new singleton
+        try {
+            const src = "/Mario%20Kart%20World.mp3"; // file in /public
+            const a = new Audio(src);
+            a.loop = true;
+            a.preload = "auto";
+            a.volume = 0.12;
+
+            // Store globally so StrictMode + re-renders don't create duplicates
+            window.__marioBgm = a;
+            bgmRef.current = a;
+
+            // Try to play (should be allowed because user clicked through Hexley sequence)
+            a.play().catch((e) => {
+                console.warn("Mario Kart music blocked by autoplay policy:", e);
+            });
+        } catch (e) {
+            console.warn("Mario Kart music init error:", e);
+        }
+
+        // ❗ INTENTIONALLY NO CLEANUP that pauses the music
+        // (Cleanup here is what was killing it during dev + transitions)
+    }, []);
+
+    // firestore subscription (Character collection)
+    useEffect(() => {
+        const unsub = onSnapshot(
+            collection(db, "Character"),
+            (snapshot) => {
+                const data = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
+                setGuests(data);
+                setCharacterEdits(Object.fromEntries(data.map(({ id, Character }) => [id, Character || ""])));
+            },
+            (error) => {
+                console.error("Firestore onSnapshot error:", error);
+            }
+        );
+
         return () => unsub();
     }, []);
 
-    const handleVillainChange = (id, value) => {
-        setVillainEdits((prev) => ({ ...prev, [id]: value }));
+    const handleCharacterChange = (id, value) => {
+        setCharacterEdits((prev) => ({ ...prev, [id]: value }));
     };
 
-    const handleVillainSubmit = async (id) => {
-        const newName = villainEdits[id]?.trim();
-        if (newName !== undefined) {
-            await updateDoc(doc(db, "villains", id), { Villain: newName });
-        }
+    const handleCharacterSubmit = async (id) => {
+        const newChoice = (characterEdits[id] ?? "").trim();
+        await updateDoc(doc(db, "Character", id), { Character: newChoice });
     };
 
     const counts = useMemo(() => {
         const total = guests.length || 0;
-        const accepted = guests.filter((g) => g.Status === "Accepted").length;
+        const confirmed = guests.filter((g) => g.Status === "Confirmed").length;
         const pending = guests.filter((g) => g.Status === "Pending").length;
         const declined = guests.filter((g) => g.Status === "Declined").length;
-        return { total, accepted, pending, declined };
+        return { total, confirmed, pending, declined };
     }, [guests]);
 
     return (
@@ -237,8 +278,7 @@ export default function VillainGameDetails() {
                 <div
                     className="absolute inset-0"
                     style={{
-                        background:
-                            "radial-gradient(circle at 50% 0%, rgba(15,23,42,0.9), transparent 55%), #020617",
+                        background: "radial-gradient(circle at 50% 0%, rgba(15,23,42,0.9), transparent 55%), #020617",
                     }}
                 />
 
@@ -257,8 +297,7 @@ export default function VillainGameDetails() {
                 <div
                     className="absolute -bottom-24 -left-1/3 h-64 w-[200%] opacity-80 blur-md rotate-[-12deg]"
                     style={{
-                        background:
-                            "linear-gradient(90deg,#f97316,#facc15,#22c55e,#0ea5e9,#6366f1,#ec4899,#f97316)",
+                        background: "linear-gradient(90deg,#f97316,#facc15,#22c55e,#0ea5e9,#6366f1,#ec4899,#f97316)",
                     }}
                 />
 
@@ -299,8 +338,7 @@ export default function VillainGameDetails() {
                         <span
                             className="block text-yellow-300 drop-shadow-[0_0_18px_rgba(250,204,21,0.9)]"
                             style={{
-                                textShadow:
-                                    "0 0 18px rgba(250,204,21,0.9), 0 0 40px rgba(252,211,77,0.7)",
+                                textShadow: "0 0 18px rgba(250,204,21,0.9), 0 0 40px rgba(252,211,77,0.7)",
                             }}
                         >
                             Stanimal&apos;s
@@ -308,8 +346,7 @@ export default function VillainGameDetails() {
                         <span
                             className="block text-yellow-200 drop-shadow-[0_0_16px_rgba(250,204,21,0.7)]"
                             style={{
-                                textShadow:
-                                    "0 0 16px rgba(250,204,21,0.7), 0 0 32px rgba(252,211,77,0.6)",
+                                textShadow: "0 0 16px rgba(250,204,21,0.7), 0 0 32px rgba(252,211,77,0.6)",
                             }}
                         >
                             Invitational
@@ -350,44 +387,27 @@ export default function VillainGameDetails() {
                             </h2>
                             <div className="space-y-3 text-sm sm:text-base text-white/85">
                                 <p>
-                                    <span className="font-semibold text-yellow-200">
-                                        Game:
-                                    </span>{" "}
+                                    <span className="font-semibold text-yellow-200">Game:</span>{" "}
                                     We&apos;re switching things up from poker and running a full{" "}
-                                    <span className="font-semibold">Mario Kart tournament</span> this time.
-                                    Expect races, chaos, and the occasional friendship-testing blue shell.
+                                    <span className="font-semibold">Mario Kart tournament</span> this time. Expect races,
+                                    chaos, and the occasional friendship-testing blue shell.
                                 </p>
                                 <p>
-                                    <span className="font-semibold text-yellow-200">
-                                        Food &amp; Drinks:
-                                    </span>{" "}
+                                    <span className="font-semibold text-yellow-200">Food &amp; Drinks:</span>{" "}
                                     No need to bring anything — I&apos;ve got it covered.{" "}
-                                    <span className="font-semibold">Domino&apos;s pizza</span> as usual,
-                                    plus drinks and snacks.
+                                    <span className="font-semibold">Domino&apos;s pizza</span> as usual, plus drinks and snacks.
                                 </p>
                                 <p>
-                                    <span className="font-semibold text-yellow-200">
-                                        Dress Code:
-                                    </span>{" "}
-                                    Come dressed as a{" "}
-                                    <span className="font-semibold">Mario Kart character</span>.
-                                    Go all in and{" "}
-                                    <span className="font-semibold uppercase">
-                                        commit to the bit
-                                    </span>
-                                    .
+                                    <span className="font-semibold text-yellow-200">Dress Code:</span>{" "}
+                                    Come dressed as a <span className="font-semibold">Mario Kart character</span>. Go all in and{" "}
+                                    <span className="font-semibold uppercase">commit to the bit</span>.
                                 </p>
                                 <p>
-                                    <span className="font-semibold text-yellow-200">
-                                        Location:
-                                    </span>{" "}
+                                    <span className="font-semibold text-yellow-200">Location:</span>{" "}
                                     701 Martha Ave, APT 3119, Lancaster, PA 17601
                                 </p>
                                 <p>
-                                    <span className="font-semibold text-yellow-200">
-                                        Start Time:
-                                    </span>{" "}
-                                    May 2nd @ 6:00 PM
+                                    <span className="font-semibold text-yellow-200">Start Time:</span> May 2nd @ 6:00 PM
                                 </p>
                             </div>
                         </div>
@@ -400,17 +420,15 @@ export default function VillainGameDetails() {
                             className="mb-4 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3"
                         >
                             <div>
-                                <h2 className="text-2xl font-bold text-white">
-                                    RSVP &amp; Racers
-                                </h2>
+                                <h2 className="text-2xl font-bold text-white">RSVP &amp; Characters</h2>
                                 <p className="text-sm sm:text-base text-white/75 mt-1">
-                                    Claim your spot on the starting grid and tell us who you&apos;re racing as.
+                                    Confirm your status and choose who you’ll dress as.
                                 </p>
                             </div>
 
                             <div className="flex flex-wrap gap-2 text-xs sm:text-sm">
                                 <span className="px-3 py-1 rounded-full bg-black/60 border border-white/15">
-                                    Racers: {counts.accepted}/{counts.total} confirmed
+                                    Confirmed: {counts.confirmed}/{counts.total}
                                 </span>
                                 <span className="px-3 py-1 rounded-full bg-black/60 border border-white/15">
                                     Pending: {counts.pending}
@@ -426,34 +444,24 @@ export default function VillainGameDetails() {
                             className="mx-auto grid max-w-6xl gap-6 [grid-template-columns:repeat(auto-fit,minmax(280px,1fr))]"
                         >
                             {guests.map((guest, idx) => (
-                                <motion.div
-                                    variants={fadeIn(0.03 * (idx % 10))}
-                                    key={guest.id}
-                                    className="relative"
-                                >
+                                <motion.div variants={fadeIn(0.03 * (idx % 10))} key={guest.id} className="relative">
                                     <GuestCard
                                         id={guest.id}
                                         name={guest.Name}
                                         status={guest.Status}
-                                        villain={villainEdits[guest.id]}
-                                        onStatusChange={(id, newStatus) =>
-                                            updateDoc(doc(db, "villains", id), { Status: newStatus })
-                                        }
-                                        onVillainChange={handleVillainChange}
-                                        onVillainSubmit={handleVillainSubmit}
-                                        isEditingVillain={!!editingVillainStates[guest.id]}
-                                        setEditingVillain={(editing) =>
-                                            setEditingVillainStates((p) => ({
-                                                ...p,
-                                                [guest.id]: editing,
-                                            }))
+                                        characterChoice={characterEdits[guest.id] || ""}
+                                        onStatusChange={async (id, newStatus) => {
+                                            await updateDoc(doc(db, "Character", id), { Status: newStatus });
+                                        }}
+                                        onCharacterChange={handleCharacterChange}
+                                        onCharacterSubmit={handleCharacterSubmit}
+                                        isEditingCharacter={!!editingCharacterStates[guest.id]}
+                                        setEditingCharacter={(editing) =>
+                                            setEditingCharacterStates((p) => ({ ...p, [guest.id]: editing }))
                                         }
                                         isDropdownOpen={!!statusDropdownStates[guest.id]}
                                         setDropdownOpen={(open) =>
-                                            setStatusDropdownStates((p) => ({
-                                                ...p,
-                                                [guest.id]: open,
-                                            }))
+                                            setStatusDropdownStates((p) => ({ ...p, [guest.id]: open }))
                                         }
                                     />
                                 </motion.div>
