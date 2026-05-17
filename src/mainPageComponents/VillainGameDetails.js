@@ -136,7 +136,7 @@ function GuestCard({
                             } text-white`}
                         title="Choose your character"
                     >
-                        {characterChoice || "Click here to choose who you’ll dress as"}
+                        {characterChoice || "Click here to enter who you’ll dress as"}
                     </button>
                 ) : (
                     <div className="flex flex-col gap-2">
@@ -184,6 +184,21 @@ export default function VillainGameDetails() {
     // Keep a ref to the single global music instance
     const bgmRef = useRef(null);
 
+    // Costume inspo images (put these files in /public)
+    const costumeInspo = useMemo(
+        () => [
+            { src: "/Mario.png", label: "Mario" },
+            { src: "/Luigi.png", label: "Luigi" },
+            { src: "/DonkeyKong.png", label: "Donkey Kong" },
+            { src: "/Bowser.png", label: "Bowser" },
+            { src: "/Peach.png", label: "Peach" },
+            { src: "/ShyGuy.png", label: "Shy Guy" },
+            { src: "/Daisy.png", label: "Daisy" },
+            { src: "/Toad.png", label: "Toad" },
+        ],
+        []
+    );
+
     // font
     useEffect(() => {
         const link = document.createElement("link");
@@ -219,16 +234,13 @@ export default function VillainGameDetails() {
             window.__marioBgm = a;
             bgmRef.current = a;
 
-            // Try to play (should be allowed because user clicked through Hexley sequence)
+            // Try to play
             a.play().catch((e) => {
                 console.warn("Mario Kart music blocked by autoplay policy:", e);
             });
         } catch (e) {
             console.warn("Mario Kart music init error:", e);
         }
-
-        // ❗ INTENTIONALLY NO CLEANUP that pauses the music
-        // (Cleanup here is what was killing it during dev + transitions)
     }, []);
 
     // firestore subscription (Character collection)
@@ -238,7 +250,9 @@ export default function VillainGameDetails() {
             (snapshot) => {
                 const data = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
                 setGuests(data);
-                setCharacterEdits(Object.fromEntries(data.map(({ id, Character }) => [id, Character || ""])));
+                setCharacterEdits(
+                    Object.fromEntries(data.map(({ id, Character }) => [id, Character || ""]))
+                );
             },
             (error) => {
                 console.error("Firestore onSnapshot error:", error);
@@ -376,7 +390,7 @@ export default function VillainGameDetails() {
                 </div>
             </div>
 
-            {/* Details + RSVP */}
+            {/* Details + RSVP + Costume Inspo */}
             <main className="px-4 pb-16 pt-2">
                 <div className="mx-auto flex max-w-6xl flex-col gap-10">
                     {/* Single Event Details section */}
@@ -394,12 +408,12 @@ export default function VillainGameDetails() {
                                 </p>
                                 <p>
                                     <span className="font-semibold text-yellow-200">Food &amp; Drinks:</span>{" "}
-                                    No need to bring anything — I&apos;ve got it covered.{" "}
+                                    No need to bring anything, I&apos;ve got it covered.{" "}
                                     <span className="font-semibold">Domino&apos;s pizza</span> as usual, plus drinks and snacks.
                                 </p>
                                 <p>
                                     <span className="font-semibold text-yellow-200">Dress Code:</span>{" "}
-                                    Come dressed as a <span className="font-semibold">Mario Kart character</span>. Go all in and{" "}
+                                    Come dressed as a <span className="font-semibold">Mario character</span>. Go all in and{" "}
                                     <span className="font-semibold uppercase">commit to the bit</span>.
                                 </p>
                                 <p>
@@ -407,7 +421,7 @@ export default function VillainGameDetails() {
                                     701 Martha Ave, APT 3119, Lancaster, PA 17601
                                 </p>
                                 <p>
-                                    <span className="font-semibold text-yellow-200">Start Time:</span> May 2nd @ 6:00 PM
+                                    <span className="font-semibold text-yellow-200">Start Time:</span> May 22nd @ 6:30 PM
                                 </p>
                             </div>
                         </div>
@@ -468,6 +482,87 @@ export default function VillainGameDetails() {
                             ))}
                         </motion.div>
                     </section>
+
+                    {/* ✅ Costume Inspo (swipe on mobile + trackpad scroll on laptop) */}
+                    <motion.section variants={fadeIn(0.12)}>
+                        <div className="rounded-2xl border border-white/15 bg-black/60 p-6 sm:p-7 md:p-8 shadow-[0_20px_70px_rgba(0,0,0,0.75)]">
+                            <div className="flex items-end justify-between gap-3">
+                                <div>
+                                    <h2 className="text-2xl font-bold text-white">Costume Inspiration</h2>
+                                   
+                                </div>
+                             
+                            </div>
+
+                            {/* Horizontal scroll strip */}
+                            <div className="mt-5">
+                                <div
+                                    className="mk-scroll flex gap-4 overflow-x-auto pb-3 -mx-1 px-1"
+                                    style={{
+                                        WebkitOverflowScrolling: "touch",
+                                        scrollSnapType: "x mandatory",
+                                    }}
+                                >
+                                    {costumeInspo.map((img) => (
+                                        <div
+                                            key={img.src}
+                                            className="snap-start shrink-0 w-[78%] sm:w-[320px] md:w-[360px]"
+                                            style={{ scrollSnapAlign: "start" }}
+                                        >
+                                            <div className="group relative rounded-2xl overflow-hidden border border-white/15 bg-black/40 shadow-[0_14px_40px_rgba(0,0,0,0.6)]">
+                                                <img
+                                                    src={img.src}
+                                                    alt={`${img.label} costume inspo`}
+                                                    className="h-[220px] sm:h-[240px] md:h-[260px] w-full object-cover"
+                                                    loading="lazy"
+                                                    draggable={false}
+                                                />
+                                                {/* label plate */}
+                                                <div className="absolute inset-x-0 bottom-0 p-3">
+                                                    <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-black/65 px-3 py-1.5 text-sm text-white shadow">
+                                                        <span className="h-2 w-2 rounded-full bg-yellow-300 shadow-[0_0_10px_rgba(250,204,21,0.8)]" />
+                                                        <span className="font-semibold">{img.label}</span>
+                                                    </div>
+                                                </div>
+
+                                                {/* subtle hover shine */}
+                                                <div
+                                                    className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                                                    style={{
+                                                        background:
+                                                            "radial-gradient(circle at 30% 20%, rgba(255,255,255,0.22), transparent 55%)",
+                                                    }}
+                                                />
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+
+                                {/* tiny hint for mobile */}
+                                <div className="sm:hidden mt-2 text-xs text-white/60">
+                                    Swipe →
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* nicer scrollbar */}
+                        <style jsx>{`
+              .mk-scroll::-webkit-scrollbar {
+                height: 10px;
+              }
+              .mk-scroll::-webkit-scrollbar-track {
+                background: rgba(255, 255, 255, 0.06);
+                border-radius: 999px;
+              }
+              .mk-scroll::-webkit-scrollbar-thumb {
+                background: rgba(255, 255, 255, 0.18);
+                border-radius: 999px;
+              }
+              .mk-scroll::-webkit-scrollbar-thumb:hover {
+                background: rgba(255, 255, 255, 0.28);
+              }
+            `}</style>
+                    </motion.section>
                 </div>
             </main>
         </motion.div>

@@ -6,15 +6,12 @@ export default function TransitionScreen({ onComplete }) {
     const hexleyLines = [
         { img: "Hexley_Smug.png", text: "Oh?" },
         { img: "Hexley_Smug.png", text: "Back again so soon?" },
-        { img: "Hexley_Smug.png", text: "I suppose you truly are a fool." },
         { img: "Hexley_Smug.png", text: "I guess that is to be expected." },
-        { img: "Hexley_Smug.png", text: "I guess I should welcome you all back." },
+        { img: "Hexley_Smug.png", text: "To all returning visitors, welcome back!" },
         { img: "Hexley_Smug.png", text: "For you new folk, my name is Hexley." },
         { img: "Hexley_Smug.png", text: "You’ve entered my domain and there’s no turning back now." },
-        { img: "Hexley_Smug.png", text: "Nothing happens around here without my say so." },
         { img: "Hexley_Smug.png", text: "I’m assuming you’re here for another one of those game nights." },
         { img: "Hexley_Smug.png", text: "I guess I can get something ready for you." },
-        { img: "Hexley_Smug.png", text: "I know just what to do!" },
     ];
 
     const [dialogueIndex, setDialogueIndex] = useState(0);
@@ -212,7 +209,7 @@ export default function TransitionScreen({ onComplete }) {
                     animate={{ opacity: 1 }}
                     transition={{ duration: 0.6, delay: 0.6 }}
                 >
-                    Skip to the theme
+                    Skip to Event
                 </motion.button>
             )}
 
